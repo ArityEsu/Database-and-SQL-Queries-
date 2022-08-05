@@ -1,0 +1,176 @@
+SQL> connect
+Enter user-name: 
+Connected.
+SQL> SET PAGESIZE 100
+SQL>  SET LINESIZE 200
+SQL>-- question# 1.
+SQL> SELECT * FROM stock;
+ STOCK_NUM MANU_ DESCRIPTION     UNIT_PRICE UNIT UNIT_DESCR     
+---------- ----- --------------- ---------- ---- ---------------
+        10 HROOO baseball gloves        250 case 10 gloves/case 
+        11 HSKKO baseball gloves        800 case 10 gloves/case 
+        12 SMTTO baseball gloves        450 case 10 gloves/case 
+        20 HROOO baseball               126 case 24/case        
+        30 HSKKO baseball bat           240 case 12/case        
+        40 HSKKO football               960 case 24/case        
+        41 HROOO football               480 case 24/case        
+        50 NRGGO tennis racquet          28 each each           
+        51 SMTTO tennis racquet          25 each each           
+        52 ANZZO tennis racquet        19.8 each each           
+        60 SMTTO tennis ball             36 case 24 cans/case   
+        61 ANZZO tennis balls            48 case 24 cans/case   
+        70 HROOO basketball             600 case 24/case        
+        80 ANZZO volleyball             840 case 24/case        
+        90 ANZZO volleyball net          20 each each           
+
+15 rows selected. 
+
+SQL>-- question# 2.
+SQL> SELECT lname, fname, company FROM customer ORDER BY company;
+
+LNAME           FNAME           COMPANY
+--------------- --------------- --------------------
+Jaeger          Roy             AA athletics
+Paul            Ludwig          Alls Sports Supplies
+Ream            Charles         Athletic Supplies
+Baxter          Dick            Blue Ribbon Sports
+Grent           Alfred          Gold Medal Sports
+Sipes           Arnold          Kids Korner
+Vector          Raymond         Los Altos Sports
+Parmelee        Jean            Olympic City
+Currie          Phillip         Phil's Sports
+Higgin          Anthony         Play Ball!
+Quinn           Donald          Quinn's Sports
+Lawson          Marge           Runners and Others
+Miller          Jane            Sport Stuff
+Albertson       Frank           Sporting Place
+Keyes           Frances         Sports Center
+Sadler          Carole          Sports Spots
+Beatty          Lana            Sportstown
+Watson          George          Watson and Son
+
+18 rows selected.
+
+SQL>-- question# 3.
+SQL> SELECT company FROM customer WHERE city IN('Sun', 'Red City', 'San Francisco');
+
+COMPANY
+--------------------
+Alls Sports Supplies
+Sports Spots
+Play Ball!
+Quinn's Sports
+Sport Stuff
+AA athletics
+Sports Center
+Sporting Place
+Kids Korner
+
+9 rows selected.
+
+SQL>-- question# 4.
+SQL> SELECT order_num, order_date, customer_num, ship_date, paid_date FROM orders WHERE order_date BETWEEN '31-DEC-19' AND '03-JAN-20';
+
+ ORDER_NUM ORDER_DAT CUSTOMER_NUM SHIP_DATE PAID_DATE
+---------- --------- ------------ --------- ---------
+      1110 31-DEC-19         1040 02-JAN-20 13-JAN-20
+      1120 31-DEC-19         1170 05-JAN-20
+      1130 03-JAN-20         1040 08-JAN-20 17-JAN-20
+      1140 31-DEC-19         1060 04-JAN-20 16-JAN-20
+      1150 03-JAN-20         1100 08-JAN-20 24-JAN-20
+
+SQL>-- question# 5.
+SQL> SELECT order_num, order_date, ship_charge
+  2  FROM orders WHERE backlog = 'n' AND ship_charge > 15.00;
+
+ ORDER_NUM ORDER_DAT SHIP_CHARGE
+---------- --------- -----------
+      1020 20-DEC-19        15.3
+      1050 30-DEC-19        16.2
+      1070 30-DEC-19        25.2
+
+SQL>-- question# 6.
+SQL> SELECT * FROM stock
+  2   WHERE unit_price > 200 AND manu_code LIKE 'H%' AND description LIKE 'baseball%';
+
+ STOCK_NUM MANU_ DESCRIPTION     UNIT_PRICE UNIT UNIT_DESCR     
+---------- ----- --------------- ---------- ---- ---------------
+        10 HROOO baseball gloves        250 case 10 gloves/case 
+        11 HSKKO baseball gloves        800 case 10 gloves/case 
+        30 HSKKO baseball bat           240 case 12/case  
+
+SQL>-- question# 7.
+SQL> SELECT UNIQUE company FROM customer
+  2  INNER JOIN orders ON orders.customer_num = customer.customer_num;
+
+COMPANY
+--------------------
+AA athletics
+Olympic City
+Runners and Others
+Watson and Son
+Gold Medal Sports
+Sports Center
+Kids Korner
+Play Ball!
+Alls Sports Supplies
+
+9 rows selected.
+
+SQL>-- question# 8.
+SQL> SELECT UNIQUE customer.customer_num, stock.description
+  2  FROM customer
+  3  INNER JOIN orders
+  4  ON orders.customer_num = customer.customer_num
+  5  INNER JOIN items
+  6  ON items.order_num = orders.order_num
+  7  INNER JOIN stock
+  8  ON stock.stock_num = items.stock_num
+  9  WHERE customer.customer_num BETWEEN '104' AND '108'
+ 10  ORDER BY customer.customer_num, stock.description;
+
+CUSTOMER_NUM DESCRIPTION   
+------------ ---------------
+         104 tennis ball    
+         104 tennis balls   
+         104 tennis racquet 
+         104 volleyball     
+         104 volleyball net 
+         106 baseball       
+         106 baseball bat   
+         106 baseball gloves
+         106 football       
+
+ 9 rows selected 
+
+SQL>-- question# 9.
+SQL> SELECT COUNT(DISTINCT customer.customer_num) AS "Total_Customers_with_Orders"
+  2  FROM customer,orders WHERE  orders.customer_num = customer.customer_num
+  3  ORDER BY customer.customer_num;
+
+Total_Customers_with_Orders
+---------------------------
+                          9
+
+SQL>-- question# 10.
+SQL> SELECT orders.customer_num,COUNT(DISTINCT orders.order_num) AS "number_of_orders",SUM(items.quantity) AS "Total_quantity", SUM(items.total_price) AS "Total_price"
+  2  FROM orders, items
+  3  WHERE orders.order_num = items.order_num
+  4  GROUP BY orders.customer_num
+  5  ORDER BY orders.customer_num;
+
+CUSTOMER_NUM number_of_orders Total_quantity Total_price
+------------ ---------------- -------------- -----------
+        1010                1              2        1200
+        1040                4             20      1535.8
+        1060                2              6        3566
+        1100                2              7        1390
+        1110                1              1         450
+        1120                1             17         498
+        1160                1             22         562
+        1170                2             16        2736
+
+8 rows selected.
+
+SQL> spool off;
+
